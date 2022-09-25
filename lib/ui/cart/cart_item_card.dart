@@ -23,6 +23,11 @@ class CartItemCart extends StatelessWidget {
           horizontal: 15,
           vertical: 4,
         ),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 40,
+        ),
       ),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) {
