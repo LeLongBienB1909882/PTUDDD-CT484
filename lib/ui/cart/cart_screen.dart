@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/ui/screens.dart';
+
 import 'cart_manager.dart';
 import 'cart_item_card.dart';
+
+import 'package:provider/provider.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -9,7 +13,7 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cart = CartManager();
+    final cart = context.watch<CartManager>();
     return Scaffold(
       appBar: AppBar(
         title: const Text(' Your Cart '),
@@ -54,7 +58,7 @@ class CartScreen extends StatelessWidget {
             const Spacer(),
             Chip(
               label: Text(
-                '\$${cart.totalAmout.toStringAsFixed(2)}',
+                '\$${cart.totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: Theme.of(context).primaryTextTheme.headline6?.color,
                 ),
