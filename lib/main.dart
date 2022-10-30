@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:myshop/ui/products/edit_product_screen.dart';
 import 'ui/products/product_detail_screen.dart';
 import 'ui/products/products_manager.dart';
 import 'ui/products/product_overview_screen.dart';
@@ -24,12 +24,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => AuthManager(),
-        ),
-        ChangeNotifierProvider(
+        ChangeNotifierProvider(create: (context) => AuthManager()),
+        // ChangeNotifierProvider(
+        //   create: (ctx) => ProductsManager(),
+        // ),
+        ChangeNotifierProxyProvider<AuthManager, ProductsManager>(
           create: (ctx) => ProductsManager(),
+          update: (ctx, authManager, productsManager) {
+            // Khi authManager có báo hiệu thay đổi thì đọc lại authToken
+            // cho productManager
+            productsManager!.authToken = authManager.authToken;
+            return productsManager;
+          },
         ),
+
         ChangeNotifierProvider(
           create: (ctx) => CartManager(),
         ),
@@ -59,17 +67,12 @@ class MyApp extends StatelessWidget {
                         : const AuthScreen();
                   },
                 ),
+          routes: {
+            CartScreen.routeName: (ctx) => const CartScreen(),
+            OrdersScreen.routeName: (ctx) => const OrdersScreen(),
+            UserProductsScreen.routeName: (ctx) => const UserProductsScreen(),
+          },
           onGenerateRoute: (settings) {
-            if (settings.name == ProductDetailScreen.routeName) {
-              final productId = settings.arguments as String;
-              return MaterialPageRoute(
-                builder: (ctx) {
-                  return ProductDetailScreen(
-                    ProductsManager().findById(productId),
-                  );
-                },
-              );
-            }
             if (settings.name == EditProductScreen.routeName) {
               final productId = settings.arguments as String?;
               return MaterialPageRoute(
