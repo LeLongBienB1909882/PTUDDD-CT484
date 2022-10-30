@@ -9,7 +9,10 @@ import 'ui/orders/orders_screen.dart';
 import 'ui/screens.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+Future<void> main() async {
+  await dotenv.load();
   runApp(const MyApp());
 }
 
@@ -22,6 +25,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (context) => AuthManager(),
+        ),
+        ChangeNotifierProvider(
           create: (ctx) => ProductsManager(),
         ),
         ChangeNotifierProvider(
@@ -31,7 +37,8 @@ class MyApp extends StatelessWidget {
           create: (ctx) => OrdersManager(),
         ),
       ],
-      child: MaterialApp(
+      child: Consumer<AuthManager>(builder: (ctx, authManager, child) {
+        return MaterialApp(
           title: 'My Shop',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -42,12 +49,16 @@ class MyApp extends StatelessWidget {
               secondary: Colors.deepOrange,
             ),
           ),
-          home: const ProductsOverviewScreen(),
-          routes: {
-            CartScreen.routeName: (ctx) => const CartScreen(),
-            OrdersScreen.routeName: (ctx) => const OrdersScreen(),
-            UserProductsScreen.routeName: (ctx) => const UserProductsScreen(),
-          },
+          home: authManager.isAuth
+              ? const ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: authManager.tryAutoLogin(),
+                  builder: (ctx, snapshot) {
+                    return snapshot.connectionState == ConnectionState.waiting
+                        ? const SplashScreen()
+                        : const AuthScreen();
+                  },
+                ),
           onGenerateRoute: (settings) {
             if (settings.name == ProductDetailScreen.routeName) {
               final productId = settings.arguments as String;
@@ -72,7 +83,9 @@ class MyApp extends StatelessWidget {
               );
             }
             return null;
-          }),
+          },
+        );
+      }),
     );
   }
 }
